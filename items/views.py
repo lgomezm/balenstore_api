@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.urls import resolve
 from items.models import Item, QuotationVisit, QuotationVisitStatus
 from items.permissions import QuotationVisitEditPermissions
@@ -6,7 +7,7 @@ from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from users.auth_utils import OwnerPermissions, UserPermissions
+from users.auth_utils import UserPermissions
 
 
 class QuotationVisitListCreateView(ListAPIView):
@@ -28,6 +29,24 @@ class QuotationVisitRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     serializer_class = QuotationVisitSerializer
     queryset = QuotationVisit.objects.all()
     permission_classes = [QuotationVisitEditPermissions]
+
+    def put(self, request, *args, **kwargs):
+        self.__validate()
+        return super().put(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        self.__validate()
+        return super().patch(request, *args, **kwargs)
+
+    def __validate(self):
+        quotation_visit = self.get_object()
+        if quotation_visit.status in [
+            QuotationVisitStatus.APPROVED,
+            QuotationVisitStatus.REJECTED,
+        ]:
+            raise ValidationError(
+                "This quotation visit is already approved or rejected"
+            )
 
 
 class QuotationItemListCreateView(ListAPIView):

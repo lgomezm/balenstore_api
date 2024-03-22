@@ -5,6 +5,7 @@ class QuotationVisitStatus(models.TextChoices):
     PENDING = "pending"
     CONFIRMED = "confirmed"
     REJECTED = "rejected"
+    APPROVED = "approved"
 
 
 class QuotationVisit(models.Model):

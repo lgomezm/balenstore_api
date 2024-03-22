@@ -27,6 +27,7 @@ urlpatterns = [
             [
                 path("users/", include("users.urls")),
                 path("quotation_visits/", include("items.urls")),
+                path("auctions/", include("auctions.urls")),
             ]
         ),
     ),
