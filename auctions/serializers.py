@@ -2,7 +2,7 @@ from django.http import Http404
 from django.utils import timezone
 from rest_framework import serializers
 
-from auctions.models import Auction
+from auctions.models import Auction, Bid
 from items.models import Item, QuotationVisit
 
 
@@ -46,4 +46,14 @@ class ConvertToAuctionsSerializer(serializers.Serializer):
 class AuctionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Auction
+        fields = "__all__"
+
+
+class PlaceBidSerializer(serializers.Serializer):
+    bid = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=1)
+
+
+class BidSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bid
         fields = "__all__"
