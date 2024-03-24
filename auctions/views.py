@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.db.models import Max
-from rest_framework.generics import GenericAPIView, ListAPIView
+from django.urls import resolve
+from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -42,14 +43,20 @@ class AuctionListView(ListAPIView):
     queryset = Auction.objects.all()
 
 
-class PlaceBidView(GenericAPIView):
+class ListCreateBidView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = BidSerializer
 
-    def post(self, request, pk):
+    def get_queryset(self):
+        match = resolve(self.request.path_info)
+        auction_id = match.kwargs["auction_id"]
+        return Bid.objects.filter(auction_id=auction_id)
+
+    def post(self, request, auction_id):
         serializer = PlaceBidSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            auction = Auction.objects.get(pk=pk)
+            auction = Auction.objects.get(pk=auction_id)
         except Auction.DoesNotExist:
             return Response(
                 {"error": "Auction does not exist"},
