@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from auctions.models import Auction, Bid
 from items.models import Item, QuotationVisit
+from items.serializers import ItemSerializer
 
 
 class ItemToAuctionSerializer(serializers.Serializer):
@@ -44,6 +45,8 @@ class ConvertToAuctionsSerializer(serializers.Serializer):
 
 
 class AuctionSerializer(serializers.ModelSerializer):
+    item_data = ItemSerializer(source="item", read_only=True)
+
     class Meta:
         model = Auction
         fields = "__all__"

@@ -1,7 +1,12 @@
 from django.db import transaction
 from django.db.models import Max
 from django.urls import resolve
-from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView
+from rest_framework.generics import (
+    GenericAPIView,
+    ListAPIView,
+    RetrieveAPIView,
+    ListCreateAPIView,
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -43,6 +48,12 @@ class AuctionListView(ListAPIView):
     queryset = Auction.objects.all()
 
 
+class GetAuctionView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AuctionSerializer
+    queryset = Auction.objects.all()
+
+
 class ListCreateBidView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = BidSerializer
@@ -59,12 +70,12 @@ class ListCreateBidView(ListCreateAPIView):
             auction = Auction.objects.get(pk=auction_id)
         except Auction.DoesNotExist:
             return Response(
-                {"error": "Auction does not exist"},
+                {"error": ["Auction does not exist"]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if auction.closes_at < timezone.now():
             return Response(
-                {"error": "Auction is already closed"},
+                {"error": ["Auction is already closed"]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         max_bid = Bid.objects.filter(auction=auction).aggregate(Max("amount"))[
@@ -73,16 +84,16 @@ class ListCreateBidView(ListCreateAPIView):
         if not max_bid:
             if serializer.data.get("bid") <= auction.starting_bid:
                 return Response(
-                    {"error": "Bid amount must be greater than the starting bid"},
+                    {"error": ["Bid amount must be greater than the starting bid"]},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         elif serializer.data.get("bid") <= max_bid:
             return Response(
-                {"error": "Bid amount must be greater than the current bid"},
+                {"error": ["Bid amount must be greater than the current bid"]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         bid = Bid.objects.create(
-            auction_id=pk,
+            auction_id=auction_id,
             bidder=request.user,
             amount=serializer.data.get("bid"),
         )
