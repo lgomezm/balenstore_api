@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Auction(models.Model):
-    item = models.ForeignKey("items.Item", on_delete=models.CASCADE)
+    item = models.OneToOneField("items.Item", unique=True, on_delete=models.CASCADE)
     starting_bid = models.DecimalField(max_digits=10, decimal_places=2)
     closes_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)

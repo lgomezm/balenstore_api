@@ -12,7 +12,7 @@ class QuotationVisit(models.Model):
     scheduled_at = models.DateTimeField(blank=False)
     name = models.CharField(max_length=30, blank=False)
     address_1 = models.CharField(max_length=30, blank=False)
-    address_2 = models.CharField(max_length=30, blank=False)
+    address_2 = models.CharField(max_length=30, blank=True)
     city = models.CharField(max_length=30, blank=False)
     state = models.CharField(max_length=30, blank=False)
     zip = models.CharField(max_length=30, blank=False)

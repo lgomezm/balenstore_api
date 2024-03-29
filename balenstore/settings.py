@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from datetime import timedelta
 import os
+import sys
 import environ
 from pathlib import Path
 
@@ -94,6 +95,9 @@ DATABASES = {
         "PORT": env("DB_PORT"),
     }
 }
+
+if "test" in sys.argv or "test_coverage" in sys.argv:
+    DATABASES["default"]["ENGINE"] = "django.db.backends.sqlite3"
 
 
 # Password validation
