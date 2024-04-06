@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.http import Http404
 from django.utils import timezone
 from rest_framework import serializers
@@ -10,7 +11,9 @@ from items.serializers import ItemSerializer
 class ItemToAuctionSerializer(serializers.Serializer):
     item_id = serializers.IntegerField()
     starting_bid = serializers.DecimalField(
-        max_digits=10, decimal_places=2, min_value=1
+        max_digits=10,
+        decimal_places=2,
+        min_value=Decimal(1),
     )
     closes_at = serializers.DateTimeField()
 
@@ -53,7 +56,9 @@ class AuctionSerializer(serializers.ModelSerializer):
 
 
 class PlaceBidSerializer(serializers.Serializer):
-    bid = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=1)
+    bid = serializers.DecimalField(
+        max_digits=10, decimal_places=2, min_value=Decimal(1)
+    )
 
 
 class BidSerializer(serializers.ModelSerializer):

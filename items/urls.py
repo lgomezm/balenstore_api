@@ -1,6 +1,7 @@
 from django.urls import path
 
 from items.views import (
+    GenerateUploadUrl,
     QuotationItemListCreateView,
     QuotationItemRetrieveUpdateDestroyView,
     QuotationVisitListCreateView,
@@ -24,5 +25,10 @@ urlpatterns = [
         "<int:quotation_item_pk>/items/<int:pk>",
         QuotationItemRetrieveUpdateDestroyView.as_view(),
         name="quotation_visit_items",
+    ),
+    path(
+        "items/upload",
+        GenerateUploadUrl.as_view(),
+        name="quotation_visit_items_upload_url",
     ),
 ]

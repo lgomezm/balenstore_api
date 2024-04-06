@@ -1,6 +1,13 @@
+import logging
+import boto3
+import mimetypes
+import os
+from botocore.exceptions import ClientError
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.urls import resolve
+from django.utils import timezone
+from balenstore import settings
 from items.models import Item, QuotationVisit, QuotationVisitStatus
 from items.permissions import QuotationVisitEditPermissions
 from items.serializers import ItemSerializer, QuotationVisitSerializer
@@ -8,6 +15,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework import status
 
 from users.models import UserType
@@ -104,3 +112,48 @@ class QuotationItemRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     serializer_class = ItemSerializer
     queryset = Item.objects.all()
     permission_classes = [QuotationVisitEditPermissions]
+
+
+class GenerateUploadUrl(APIView):
+    def post(self, request):
+        file_name = request.data["file_name"]
+        _, file_ext = os.path.splitext(file_name)
+        if file_ext not in mimetypes.types_map:
+            return Response(
+                {"error": f"Unsupported file extension: {file_ext}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        content_type = mimetypes.types_map[f"{file_ext}"]
+        date = timezone.now().strftime("%Y_%m_%d_%H_%M_%S")
+        key = f"{date}{file_ext}"
+        s3_client = boto3.client(
+            "s3",
+            aws_access_key_id=settings.AWS_ACCESS_KEY,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        )
+        file_path = f"items/{key}"
+        params = {
+            "Bucket": settings.AWS_S3_BUCKET,
+            "Key": file_path,
+            "ContentType": content_type,
+        }
+        try:
+            url = s3_client.generate_presigned_url(
+                ClientMethod="put_object",
+                Params=params,
+                HttpMethod="put",
+            )
+            return Response(
+                {
+                    "url": url,
+                    "final_url": f"{settings.AWS_CF_DIST_BASE_URL}{file_path}",
+                },
+                status=status.HTTP_200_OK,
+            )
+        except ClientError as e:
+            logging.exception("Could not generate upload URL", e)
+            return Response(
+                {"error": "Could not generate upload URL"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

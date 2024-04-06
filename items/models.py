@@ -29,5 +29,6 @@ class Item(models.Model):
     manufacturer = models.CharField(max_length=30, blank=False)
     country = models.CharField(max_length=30, blank=False)
     description = models.TextField(blank=False)
+    image_url = models.URLField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=False)
     quotation_visit = models.ForeignKey(QuotationVisit, on_delete=models.CASCADE)
