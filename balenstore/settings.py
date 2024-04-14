@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from datetime import timedelta
-import os
 import sys
 import environ
 from pathlib import Path
@@ -32,7 +31,11 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "balenstore-api-96fdc6e6f8ab.herokuapp.com"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "balenstore-api-96fdc6e6f8ab.herokuapp.com",
+    "balenstore-web-6381b1a2990f.herokuapp.com",
+]
 
 
 # Application definition
@@ -158,6 +161,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://localhost:\d+$",
+    r"^https://balenstore-web-6381b1a2990f.herokuapp.com$",
 ]
 
 SIMPLE_JWT = {
