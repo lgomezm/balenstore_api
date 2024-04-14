@@ -92,10 +92,12 @@ class ListCreateBidView(ListCreateAPIView):
                 {"error": ["Bid amount must be greater than the current bid"]},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        bid = Bid.objects.create(
-            auction_id=auction_id,
-            bidder=request.user,
-            amount=serializer.data.get("bid"),
-        )
+        with transaction.atomic():
+            bid = Bid.objects.create(
+                auction_id=auction_id,
+                bidder=request.user,
+                amount=serializer.data.get("bid"),
+            )
+            auction.current_bid = serializer.data.get("bid")
         response_serializer = BidSerializer(bid)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
