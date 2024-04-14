@@ -99,5 +99,6 @@ class ListCreateBidView(ListCreateAPIView):
                 amount=serializer.data.get("bid"),
             )
             auction.current_bid = serializer.data.get("bid")
+            auction.save()
         response_serializer = BidSerializer(bid)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
